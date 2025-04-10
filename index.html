@@ -4,30 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The War Room Trenches</title>
-    <!-- Tailwind CSS (via CDN) -->
+    <title>The War Room Trenches - Chat App</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Library (v2) -->
+    <!-- Supabase JS CDN (v2) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
-        /* Fade Down for the header */
-        @keyframes fadeDown {
-            0% {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fadeDown {
-            animation: fadeDown 0.8s ease-out forwards;
-        }
-
-        /* Fade/Slide Up for main content */
+        /* Custom Animations */
         @keyframes fadeSlideUp {
             0% {
                 opacity: 0;
@@ -44,7 +27,22 @@
             animation: fadeSlideUp 0.8s ease-out forwards;
         }
 
-        /* Shimmer animation for sign-in button */
+        @keyframes fadeDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeDown {
+            animation: fadeDown 0.8s ease-out forwards;
+        }
+
         @keyframes shimmer {
             0% {
                 background-position: 0% 50%;
@@ -63,42 +61,36 @@
     </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-b from-[#1a1611] to-[#24180f] text-[#e0d2c3]">
-    <!-- Header -->
-    <header class="bg-[#2a2018] border-b-2 border-[#8b5a2b] py-4 px-6 shadow-md animate-fadeDown">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-[#d4a76a] tracking-wide">
-                The War Room Trenches
-            </h1>
-            <div id="header-user-info" class="flex items-center gap-3">
-                <!-- User info will be appended here when signed in -->
-            </div>
+<body class="bg-gradient-to-b from-[#1a1611] to-[#24180f] text-[#e0d2c3]">
+    <!-- Header Section -->
+    <header class="py-6 bg-[#2a2018] shadow-md animate-fadeDown">
+        <div class="container mx-auto flex justify-center">
+            <h1 class="text-4xl font-bold text-[#d4a76a] tracking-wide">The War Room Trenches</h1>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main
-        class="container mx-auto flex flex-col items-center justify-center min-h-[70vh] py-10 px-4 animate-fadeSlideUp">
-        <!-- Sign-In Card -->
+    <!-- Main Content Area -->
+    <main class="container mx-auto flex flex-col items-center justify-center min-h-[80vh]">
+        <!-- Sign-In Card (visible when not signed in) -->
         <div id="sign-in-card"
-            class="w-full max-w-md bg-[#2a2018] rounded-xl border border-[#8b5a2b] shadow-2xl p-8 text-center">
+            class="max-w-md w-full bg-[#2a2018] rounded-xl shadow-2xl p-8 text-center border border-[#8b5a2b] animate-fadeSlideUp">
             <h2 class="text-3xl font-bold text-[#d4a76a] mb-4">Enter the War Room</h2>
             <p class="text-lg text-[#a08068] mb-8">
-                Sign in with Google to join our secret council and lead world-changing discussions.
+                Sign in with Google to join our secret council and strategize world-changing ideas.
             </p>
             <button id="login"
-                class="btn-shimmer text-[#3E2723] py-3 w-full rounded-full uppercase font-semibold tracking-wider shadow-md hover:scale-105 transition-transform duration-300">
+                class="w-full btn-shimmer text-[#3E2723] py-3 rounded-full uppercase tracking-wider font-semibold shadow-lg transform transition-all duration-300 hover:scale-105">
                 Sign In with Google
             </button>
         </div>
 
-        <!-- Profile Card (visible once signed in) -->
+        <!-- Profile Card (visible when signed in) -->
         <div id="profile-card"
-            class="hidden w-full max-w-md bg-[#2a2018] rounded-xl border border-[#8b5a2b] shadow-2xl p-8 text-center mt-8">
+            class="hidden max-w-md w-full bg-[#2a2018] rounded-xl shadow-2xl p-8 text-center border border-[#8b5a2b] animate-fadeSlideUp">
             <img id="profile-photo" class="w-24 h-24 mx-auto rounded-full border-4 border-[#D7CCC8] mb-4"
-                src="https://via.placeholder.com/100" alt="Profile Photo" />
+                src="https://via.placeholder.com/100" alt="Profile Photo">
             <h2 class="text-2xl font-bold text-[#d4a76a]">Welcome,</h2>
-            <p id="profile-name" class="text-3xl font-semibold mb-6">User</p>
+            <p id="profile-name" class="text-3xl font-semibold mb-4">User</p>
             <button id="logout"
                 class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors duration-200 shadow-md">
                 Sign Out
@@ -106,35 +98,37 @@
         </div>
     </main>
 
-    <!-- Loading Screen (hidden by default) -->
+    <!-- User Info Display (optional, can be removed if not used) -->
+    <div id="user-info" class="container mx-auto mt-6 text-center animate-fadeSlideUp"></div>
+
+    <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-[#1a1611] hidden">
         <div class="flex flex-col items-center animate-fadeSlideUp">
             <div
                 class="w-16 h-16 border-4 border-t-4 border-[#d4a76a] border-t-transparent rounded-full animate-spin mb-4">
             </div>
-            <h2 class="text-[#d4a76a] text-xl font-medium animate-pulse">
-                Loading War Room Trenches...
-            </h2>
+            <h2 class="text-[#d4a76a] text-xl font-medium animate-pulse">Loading War Room Trenches...</h2>
         </div>
     </div>
 
+    <!-- Supabase Auth and UI Script -->
     <script>
-        // 1. Supabase Initialization
+        // Initialize the Supabase client
         const supabaseUrl = 'https://rxnaepberqsnkmvtwmng.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4bmFlcGJlcnFzbmttdnR3bW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyNDU1MzMsImV4cCI6MjA1OTgyMTUzM30.oCSYR99pGXb6laiaXplzg-G5Y_92PBYXOsijQrW3avo';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // 2. DOM References
+        // DOM Element References
         const signInCard = document.getElementById('sign-in-card');
         const profileCard = document.getElementById('profile-card');
-        const headerUserInfo = document.getElementById('header-user-info');
+        const userInfoDiv = document.getElementById('user-info');
         const loginBtn = document.getElementById('login');
         const logoutBtn = document.getElementById('logout');
         const profilePhoto = document.getElementById('profile-photo');
         const profileName = document.getElementById('profile-name');
         const loadingScreen = document.getElementById('loading-screen');
 
-        // 3. Loading Screen
+        // Loading Screen Control
         function showLoading(show) {
             if (show) {
                 loadingScreen.classList.remove('hidden');
@@ -142,64 +136,55 @@
                 loadingScreen.classList.add('hidden');
             }
         }
-
-        // Initially show loading
+        // Initially show loading screen
         showLoading(true);
 
-        // 4. Update UI based on session
-        function updateUI(session) {
+        // Update UI based on session
+        async function updateUI(session) {
             if (session && session.user) {
-                // Hide sign-in card, show profile
                 signInCard.classList.add('hidden');
                 profileCard.classList.remove('hidden');
 
-                const displayName = session.user.user_metadata.full_name || session.user.email || 'Warrior';
-                const photoURL = session.user.user_metadata.avatar_url || 'https://via.placeholder.com/100';
+                const displayName = session.user.user_metadata.full_name || session.user.email || "User";
+                const photoURL = session.user.user_metadata.avatar_url || "https://via.placeholder.com/100";
 
-                // Update profile card
                 profilePhoto.src = photoURL;
                 profileName.textContent = displayName;
-
-                // Update header user info
-                headerUserInfo.innerHTML = `
-          <img src="${photoURL}" alt="${displayName}" class="w-8 h-8 rounded-full border border-[#8b5a2b] object-cover">
-          <span class="text-[#d4a76a] font-semibold">${displayName}</span>
-        `;
             } else {
-                // Show sign-in card, hide profile
                 signInCard.classList.remove('hidden');
                 profileCard.classList.add('hidden');
-                headerUserInfo.innerHTML = '';
+                userInfoDiv.innerHTML = "";
             }
         }
 
-        // 5. Check initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        // Check for an existing session on load
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
             updateUI(session);
             showLoading(false);
         });
 
-        // 6. Listen for Auth State Changes
-        supabase.auth.onAuthStateChange((_event, session) => {
+        // Listen for auth state changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             updateUI(session);
         });
 
-        // 7. Sign In / Out Handlers
+        // Handle sign-in with Google
         loginBtn.addEventListener('click', async () => {
-            showLoading(true);
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
             if (error) {
-                console.error('Error during sign-in:', error.message);
-                showLoading(false);
+                console.error('Error during Google sign-in:', error.message);
             }
         });
 
-        logoutBtn.addEventListener('click', async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                console.error('Error during sign-out:', error.message);
-            }
-        });
+        // Handle sign-out
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) {
+                    console.error('Error during sign out:', error.message);
+                }
+            });
+        }
     </script>
 </body>
 
