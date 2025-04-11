@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The War Room Trenches - Chat App</title>
+    <title>The War Room Trenches - Strategy Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS CDN (v2) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Custom Animations */
         @keyframes fadeSlideUp {
@@ -24,7 +24,7 @@
         }
 
         .animate-fadeSlideUp {
-            animation: fadeSlideUp 0.8s ease-out forwards;
+            animation: fadeSlideUp 0.5s ease-out forwards;
         }
 
         @keyframes fadeDown {
@@ -40,7 +40,7 @@
         }
 
         .animate-fadeDown {
-            animation: fadeDown 0.8s ease-out forwards;
+            animation: fadeDown 0.5s ease-out forwards;
         }
 
         @keyframes shimmer {
@@ -58,22 +58,322 @@
             background-size: 400% 400%;
             animation: shimmer 6s ease infinite;
         }
+
+        /* Chat Bubble Styles */
+        .message-bubble {
+            position: relative;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            max-width: 80%;
+            word-break: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .message-bubble:hover {
+            transform: translateY(-2px);
+        }
+
+        .message-bubble-mine {
+            background-color: #8b5a2b;
+            color: #f5efe6;
+            border-bottom-right-radius: 0;
+            margin-left: auto;
+            border-right: 3px solid #d4a76a;
+        }
+
+        .message-bubble-others {
+            background-color: #3c2f24;
+            color: #e0d2c3;
+            border-bottom-left-radius: 0;
+            margin-right: auto;
+            border-left: 3px solid #d4a76a;
+        }
+
+        /* Delete button */
+        .delete-message-btn {
+            transition: all 0.2s ease;
+        }
+
+        .delete-message-btn:hover {
+            background-color: #ef4444;
+            transform: scale(1.2);
+        }
+
+        /* Confirmation modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: #2a2018;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #8b5a2b;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* Profile Card Styles */
+        .profile-card {
+            background: linear-gradient(145deg, #312418, #3c2f24);
+            border-radius: 1rem;
+            border: 1px solid #8b5a2b;
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border-color: #d4a76a;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .role-badge.bishop {
+            background-color: #4b5563;
+            color: #e5e7eb;
+            border: 1px solid #9ca3af;
+        }
+
+        .role-badge.knight {
+            background-color: #b45309;
+            color: #fef3c7;
+            border: 1px solid #fbbf24;
+        }
+
+        /* Custom Tab Design */
+        .tab-button {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #d4a76a;
+            transition: width 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #d4a76a;
+        }
+
+        .tab-button.active:after {
+            width: 100%;
+        }
+
+        /* Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2a2018;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #8b5a2b;
+            border-radius: 20px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #d4a76a;
+            border-radius: 50%;
+            margin: 0 2px;
+            opacity: 0.6;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation: bounce 1s infinite 0.1s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation: bounce 1s infinite 0.3s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation: bounce 1s infinite 0.5s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Date Divider */
+        .date-divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            opacity: 0.7;
+        }
+
+        .date-divider::before,
+        .date-divider::after {
+            content: "";
+            flex-grow: 1;
+            height: 1px;
+            background-color: #8b5a2b;
+            margin: 0 10px;
+        }
+
+        /* Skill Tags */
+        .skill-tag {
+            display: inline-block;
+            background-color: #3c2f24;
+            color: #d4a76a;
+            border: 1px solid #8b5a2b;
+            border-radius: 1rem;
+            padding: 0.25rem 0.5rem;
+            margin: 0.25rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .skill-tag:hover {
+            background-color: #4d3d30;
+            transform: translateY(-1px);
+        }
+
+        /* Onboarding Steps */
+        .onboarding-step {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .onboarding-step.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #3c2f24;
+            border: 2px solid #8b5a2b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .step-indicator.completed {
+            background-color: #8b5a2b;
+            border-color: #d4a76a;
+        }
+
+        .step-connector {
+            flex-grow: 1;
+            height: 2px;
+            background-color: #8b5a2b;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .step-connector.completed {
+            background-color: #d4a76a;
+        }
+
+        /* User List Animation */
+        .user-list-item {
+            transition: all 0.3s ease;
+        }
+
+        .user-list-item:hover {
+            background-color: #3c2f24;
+            transform: translateX(5px);
+        }
     </style>
 </head>
 
 <body class="bg-gradient-to-b from-[#1a1611] to-[#24180f] text-[#e0d2c3]">
     <!-- Header Section -->
     <header class="py-6 bg-[#2a2018] shadow-md animate-fadeDown">
-        <div class="container mx-auto flex justify-center">
+        <div class="container mx-auto flex justify-between items-center px-4">
             <h1 class="text-4xl font-bold text-[#d4a76a] tracking-wide">The War Room Trenches</h1>
+            <div id="header-nav" class="hidden">
+                <nav class="flex space-x-6">
+                    <button id="nav-chat" class="text-[#e0d2c3] hover:text-[#d4a76a] transition-colors">Chat</button>
+                    <button id="nav-profiles"
+                        class="text-[#e0d2c3] hover:text-[#d4a76a] transition-colors">Profiles</button>
+                    <button id="nav-my-profile" class="text-[#e0d2c3] hover:text-[#d4a76a] transition-colors">My
+                        Profile</button>
+                </nav>
+            </div>
         </div>
     </header>
 
     <!-- Main Content Area -->
-    <main class="container mx-auto flex flex-col items-center justify-center min-h-[80vh]">
+    <main class="container mx-auto flex flex-col items-center justify-center min-h-[80vh] px-4">
         <!-- Sign-In Card (visible when not signed in) -->
         <div id="sign-in-card"
             class="max-w-md w-full bg-[#2a2018] rounded-xl shadow-2xl p-8 text-center border border-[#8b5a2b] animate-fadeSlideUp">
+            <img src="https://i.imgur.com/KxQQmJU.png" alt="War Room Logo"
+                class="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-[#d4a76a]">
             <h2 class="text-3xl font-bold text-[#d4a76a] mb-4">Enter the War Room</h2>
             <p class="text-lg text-[#a08068] mb-8">
                 Sign in with Google to join our secret council and strategize world-changing ideas.
@@ -84,22 +384,363 @@
             </button>
         </div>
 
-        <!-- Profile Card (visible when signed in) -->
-        <div id="profile-card"
-            class="hidden max-w-md w-full bg-[#2a2018] rounded-xl shadow-2xl p-8 text-center border border-[#8b5a2b] animate-fadeSlideUp">
-            <img id="profile-photo" class="w-24 h-24 mx-auto rounded-full border-4 border-[#D7CCC8] mb-4"
-                src="https://via.placeholder.com/100" alt="Profile Photo">
-            <h2 class="text-2xl font-bold text-[#d4a76a]">Welcome,</h2>
-            <p id="profile-name" class="text-3xl font-semibold mb-4">User</p>
-            <button id="logout"
-                class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors duration-200 shadow-md">
-                Sign Out
-            </button>
+        <!-- Onboarding Flow (visible for new users) -->
+        <div id="onboarding-flow"
+            class="hidden w-full max-w-2xl bg-[#2a2018] rounded-xl shadow-2xl p-8 border border-[#8b5a2b] animate-fadeSlideUp">
+            <h2 class="text-3xl font-bold text-[#d4a76a] mb-6 text-center">Welcome to the War Room</h2>
+
+            <!-- Progress Indicator -->
+            <div class="flex items-center justify-center mb-8">
+                <div id="step-indicator-1" class="step-indicator completed">1</div>
+                <div id="step-connector-1" class="step-connector"></div>
+                <div id="step-indicator-2" class="step-indicator">2</div>
+                <div id="step-connector-2" class="step-connector"></div>
+                <div id="step-indicator-3" class="step-indicator">3</div>
+            </div>
+
+            <!-- Step 1: Basic Info -->
+            <div id="onboarding-step-1" class="onboarding-step active">
+                <h3 class="text-xl font-bold text-[#d4a76a] mb-4">Tell us about yourself</h3>
+                <div class="mb-4">
+                    <label for="display-name" class="block text-[#a08068] mb-2">Display Name</label>
+                    <input type="text" id="display-name"
+                        class="w-full bg-[#3c2f24] text-[#e0d2c3] rounded-lg py-2 px-3 outline-none border border-[#8b5a2b]">
+                </div>
+                <div class="mb-6">
+                    <label for="bio" class="block text-[#a08068] mb-2">Brief Bio</label>
+                    <textarea id="bio" rows="3"
+                        class="w-full bg-[#3c2f24] text-[#e0d2c3] rounded-lg py-2 px-3 outline-none border border-[#8b5a2b]"
+                        placeholder="Tell us about your background..."></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button id="step-1-next"
+                        class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Skills -->
+            <div id="onboarding-step-2" class="onboarding-step hidden">
+                <h3 class="text-xl font-bold text-[#d4a76a] mb-4">What are your skills?</h3>
+                <p class="text-[#a08068] mb-4">Select your areas of expertise or add your own.</p>
+
+                <div id="skill-options" class="flex flex-wrap gap-2 mb-4">
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Strategy">Strategy</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Intelligence">Intelligence</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Logistics">Logistics</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Negotiation">Negotiation</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Leadership">Leadership</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Analysis">Analysis</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Planning">Planning</div>
+                    <div class="skill-option cursor-pointer px-3 py-1 rounded-full border border-[#8b5a2b] hover:bg-[#3c2f24] transition-colors"
+                        data-skill="Communication">Communication</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="custom-skill" class="block text-[#a08068] mb-2">Add Custom Skill</label>
+                    <div class="flex">
+                        <input type="text" id="custom-skill"
+                            class="flex-1 bg-[#3c2f24] text-[#e0d2c3] rounded-l-lg py-2 px-3 outline-none border border-[#8b5a2b]">
+                        <button id="add-custom-skill"
+                            class="bg-[#8b5a2b] text-[#f5efe6] px-4 py-2 rounded-r-lg hover:bg-[#a06c33] transition-colors">Add</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-[#a08068] mb-2">Your Selected Skills:</label>
+                    <div id="selected-skills"
+                        class="flex flex-wrap gap-2 min-h-8 p-2 rounded-lg border border-[#8b5a2b] bg-[#1a1611]">
+                        <!-- Selected skills will appear here -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button id="step-2-back"
+                        class="bg-[#3c2f24] text-[#e0d2c3] px-6 py-2 rounded-full hover:bg-[#4d3d30] transition-colors">Back</button>
+                    <button id="step-2-next"
+                        class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Role Selection -->
+            <div id="onboarding-step-3" class="onboarding-step hidden">
+                <h3 class="text-xl font-bold text-[#d4a76a] mb-4">Choose Your Role</h3>
+                <p class="text-[#a08068] mb-6">Select the role you wish to pursue in the War Room Trenches.</p>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- Bishop Role Card -->
+                    <div id="role-bishop"
+                        class="role-card p-4 rounded-lg border border-[#8b5a2b] cursor-pointer hover:border-[#d4a76a] transition-all duration-300 hover:shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-lg font-bold text-[#d4a76a]">Bishop</h4>
+                            <span id="bishop-count" class="text-sm text-[#a08068]">0/2 filled</span>
+                        </div>
+                        <p class="text-[#e0d2c3] text-sm mb-4">Bishops are the strategists and advisors of the War Room.
+                            They analyze information and develop plans.</p>
+                        <div class="text-xs text-[#a08068] italic">Requires intelligence and analytical skills</div>
+                    </div>
+
+                    <!-- Knight Role Card -->
+                    <div id="role-knight"
+                        class="role-card p-4 rounded-lg border border-[#8b5a2b] cursor-pointer hover:border-[#d4a76a] transition-all duration-300 hover:shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-lg font-bold text-[#d4a76a]">Knight</h4>
+                            <span id="knight-count" class="text-sm text-[#a08068]">0/2 filled</span>
+                        </div>
+                        <p class="text-[#e0d2c3] text-sm mb-4">Knights are the leaders and executors of the War Room's
+                            plans. They implement strategies and lead others.</p>
+                        <div class="text-xs text-[#a08068] italic">Requires leadership and decisive action</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button id="step-3-back"
+                        class="bg-[#3c2f24] text-[#e0d2c3] px-6 py-2 rounded-full hover:bg-[#4d3d30] transition-colors">Back</button>
+                    <button id="complete-onboarding"
+                        class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors">Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Interface with Tabs (visible when signed in and onboarded) -->
+        <div id="app-interface" class="hidden w-full max-w-6xl animate-fadeSlideUp">
+            <!-- Tab Navigation -->
+            <div class="bg-[#2a2018] rounded-t-xl p-4 border-b border-[#8b5a2b] flex space-x-8">
+                <button id="tab-chat" class="tab-button active text-[#d4a76a] font-medium">Chat</button>
+                <button id="tab-profiles" class="tab-button text-[#e0d2c3] font-medium">Profiles</button>
+                <button id="tab-my-profile" class="tab-button text-[#e0d2c3] font-medium">My Profile</button>
+                <div class="ml-auto">
+                    <button id="logout-app"
+                        class="bg-[#8b5a2b] text-[#f5efe6] px-4 py-2 rounded-full text-sm hover:bg-[#a06c33] transition-colors duration-200 shadow-md">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Content Container -->
+            <div id="tab-content" class="bg-[#241c14] min-h-[75vh]">
+                <!-- Chat Tab Content -->
+                <div id="chat-tab" class="h-[75vh] flex flex-col">
+                    <!-- Chat Header -->
+                    <div class="bg-[#2a2018] p-4 border-b border-[#8b5a2b] flex items-center justify-between">
+                        <div class="flex items-center">
+                            <img id="profile-photo-chat" class="w-10 h-10 rounded-full border-2 border-[#D7CCC8]"
+                                src="https://via.placeholder.com/100" alt="Profile Photo">
+                            <div class="ml-3">
+                                <p id="profile-name-chat" class="font-semibold text-[#d4a76a]">User</p>
+                                <p class="text-xs text-[#a08068]">Active Now</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div id="online-users" class="mr-4 text-sm flex items-center">
+                                <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                                <span class="text-[#a08068]">Loading users...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div id="messages-container" class="flex-1 p-4 overflow-y-auto flex flex-col custom-scrollbar">
+                        <!-- Messages will be populated here by JavaScript -->
+                        <div class="text-center text-[#a08068] text-sm my-4 p-2 bg-[#1a1611] bg-opacity-40 rounded-lg">
+                            — Welcome to the War Room Trenches —
+                            <div class="mt-2 text-xs text-[#a08068]">The place where strategies are forged</div>
+                        </div>
+
+                        <!-- Loading messages indicator -->
+                        <div id="loading-messages" class="flex justify-center my-4">
+                            <div class="typing-indicator inline-flex items-center bg-[#2a2018] px-4 py-2 rounded-full">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Input Area -->
+                    <div class="bg-[#2a2018] p-4 rounded-b-xl border-t border-[#8b5a2b]">
+                        <form id="message-form" class="flex items-center">
+                            <input id="message-input" type="text"
+                                class="flex-1 bg-[#3c2f24] text-[#e0d2c3] rounded-l-full py-3 px-4 outline-none border border-[#8b5a2b] placeholder-[#a08068]"
+                                placeholder="Type your strategy..." required>
+                            <button type="submit"
+                                class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-3 rounded-r-full hover:bg-[#a06c33] transition-colors duration-200 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Profiles Tab Content -->
+                <div id="profiles-tab" class="hidden h-[75vh] flex flex-col">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-[#d4a76a] mb-6">War Room Members</h2>
+
+                        <!-- Search and Filter -->
+                        <div class="flex flex-col md:flex-row gap-4 mb-6">
+                            <div class="flex-1">
+                                <input type="text" id="user-search"
+                                    class="w-full bg-[#3c2f24] text-[#e0d2c3] rounded-lg py-2 px-3 outline-none border border-[#8b5a2b]"
+                                    placeholder="Search members...">
+                            </div>
+                            <div class="flex space-x-2">
+                                <button id="filter-all"
+                                    class="bg-[#8b5a2b] text-[#f5efe6] px-4 py-2 rounded-lg hover:bg-[#a06c33] transition-colors">All</button>
+                                <button id="filter-online"
+                                    class="bg-[#3c2f24] text-[#e0d2c3] px-4 py-2 rounded-lg hover:bg-[#4d3d30] transition-colors">Online</button>
+                                <button id="filter-bishops"
+                                    class="bg-[#3c2f24] text-[#e0d2c3] px-4 py-2 rounded-lg hover:bg-[#4d3d30] transition-colors">Bishops</button>
+                                <button id="filter-knights"
+                                    class="bg-[#3c2f24] text-[#e0d2c3] px-4 py-2 rounded-lg hover:bg-[#4d3d30] transition-colors">Knights</button>
+                            </div>
+                        </div>
+
+                        <!-- Members Grid -->
+                        <div id="members-grid"
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar max-h-[calc(75vh-12rem)]">
+                            <!-- User profile cards will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Profile Tab Content -->
+                <div id="my-profile-tab" class="hidden h-[75vh] overflow-y-auto custom-scrollbar">
+                    <div class="max-w-2xl mx-auto p-6">
+                        <div class="bg-[#2a2018] rounded-xl border border-[#8b5a2b] p-6 mb-6">
+                            <div class="flex flex-col md:flex-row items-center gap-6 mb-6">
+                                <img id="my-profile-photo" class="w-24 h-24 rounded-full border-2 border-[#d4a76a]"
+                                    src="https://via.placeholder.com/100" alt="Your Profile Photo">
+                                <div class="flex-1 text-center md:text-left">
+                                    <h2 id="my-profile-name" class="text-2xl font-bold text-[#d4a76a] mb-2">Your Name
+                                    </h2>
+                                    <div id="my-profile-role-badge" class="inline-block"></div>
+                                    <p id="my-profile-email" class="text-[#a08068] mt-2">your.email@example.com</p>
+                                </div>
+                                <button id="edit-profile-btn"
+                                    class="bg-[#8b5a2b] text-[#f5efe6] px-4 py-2 rounded-full hover:bg-[#a06c33] transition-colors">Edit
+                                    Profile</button>
+                            </div>
+
+                            <div class="mb-6">
+                                <h3 class="text-xl font-bold text-[#d4a76a] mb-2">Bio</h3>
+                                <p id="my-profile-bio" class="text-[#e0d2c3]">Your bio will appear here...</p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-[#d4a76a] mb-2">Skills</h3>
+                                <div id="my-profile-skills" class="flex flex-wrap gap-2">
+                                    <!-- Skills will be added here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Section -->
+                        <div class="bg-[#2a2018] rounded-xl border border-[#8b5a2b] p-6">
+                            <h3 class="text-xl font-bold text-[#d4a76a] mb-4">Recent Activity</h3>
+                            <div id="my-recent-messages" class="space-y-3">
+                                <!-- Recent messages will be added here -->
+                                <div class="text-center text-[#a08068] p-4">
+                                    Loading your recent activity...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile Modal -->
+        <div id="user-profile-modal" class="modal">
+            <div class="modal-content max-w-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-[#d4a76a]">User Profile</h3>
+                    <button id="close-profile-modal"
+                        class="text-[#a08068] hover:text-[#e0d2c3] text-xl">&times;</button>
+                </div>
+                <div class="mb-4 flex flex-col sm:flex-row items-center gap-4">
+                    <img id="modal-profile-photo" class="w-20 h-20 rounded-full border-2 border-[#d4a76a]"
+                        src="https://via.placeholder.com/100" alt="Profile Photo">
+                    <div>
+                        <h4 id="modal-profile-name" class="text-lg font-bold text-[#e0d2c3] mb-1">User Name</h4>
+                        <div id="modal-profile-role" class="mb-2"></div>
+                        <p id="modal-profile-status" class="text-sm"></p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="text-[#d4a76a] font-medium mb-2">Bio</h4>
+                    <p id="modal-profile-bio" class="text-[#e0d2c3] text-sm bg-[#1a1611] p-3 rounded-lg">User bio will
+                        appear here...</p>
+                </div>
+                <div class="mb-4">
+                    <h4 class="text-[#d4a76a] font-medium mb-2">Skills</h4>
+                    <div id="modal-profile-skills" class="flex flex-wrap gap-2">
+                        <!-- Skills will be added here -->
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[#d4a76a] font-medium mb-2">Recent Messages</h4>
+                    <div id="modal-recent-messages"
+                        class="max-h-40 overflow-y-auto custom-scrollbar bg-[#1a1611] p-3 rounded-lg">
+                        <!-- Recent messages will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div id="edit-profile-modal" class="modal">
+            <div class="modal-content max-w-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-[#d4a76a]">Edit Profile</h3>
+                    <button id="close-edit-modal" class="text-[#a08068] hover:text-[#e0d2c3] text-xl">&times;</button>
+                </div>
+                <form id="edit-profile-form">
+                    <div class="mb-4">
+                        <label for="edit-display-name" class="block text-[#a08068] mb-2">Display Name</label>
+                        <input type="text" id="edit-display-name"
+                            class="w-full bg-[#3c2f24] text-[#e0d2c3] rounded-lg py-2 px-3 outline-none border border-[#8b5a2b]">
+                    </div>
+                    <div class="mb-4">
+                        <label for="edit-bio" class="block text-[#a08068] mb-2">Bio</label>
+                        <textarea id="edit-bio" rows="3"
+                            class="w-full bg-[#3c2f24] text-[#e0d2c3] rounded-lg py-2 px-3 outline-none border border-[#8b5a2b]"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[#a08068] mb-2">Skills</label>
+                        <div id="edit-skill-options" class="flex flex-wrap gap-2 mb-4">
+                            <!-- Skill options will be added here -->
+                        </div>
+                        <div class="flex mb-2">
+                            <input type="text" id="edit-custom-skill"
+                                class="flex-1 bg-[#3c2f24] text-[#e0d2c3] rounded-l-lg py-2 px-3 outline-none border border-[#8b5a2b]"
+                                placeholder="Add custom skill">
+                            <button type="button" id="edit-add-skill"
+                                class="bg-[#8b5a2b] text-[#f5efe6] px-4 py-2 rounded-r-lg hover:bg-[#a06c33] transition-colors">Add</button>
+                        </div>
+                        <div id="edit-selected-skills"
+                            class="flex flex-wrap gap-2 min-h-8 p-2 rounded-lg border border-[#8b5a2b] bg-[#1a1611]">
+                            <!-- Selected skills will be added here -->
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit"
+                            class="bg-[#8b5a2b] text-[#f5efe6] px-6 py-2 rounded-full hover:bg-[#a06c33] transition-colors">Save
+                            Changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </main>
-
-    <!-- User Info Display (optional, can be removed if not used) -->
-    <div id="user-info" class="container mx-auto mt-6 text-center animate-fadeSlideUp"></div>
 
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-[#1a1611] hidden">
@@ -111,22 +752,183 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal for Delete -->
+    <div id="delete-confirmation-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-[#d4a76a] mb-4">Delete Message</h3>
+            <p class="text-[#e0d2c3] mb-6">Are you sure you want to delete this message? This action cannot be undone.
+            </p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-delete"
+                    class="px-4 py-2 bg-[#3c2f24] text-[#e0d2c3] rounded-md hover:bg-[#4d3d30] transition-colors">
+                    Cancel
+                </button>
+                <button id="confirm-delete"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Message for notifications -->
+    <div id="toast-message"
+        class="hidden fixed bottom-4 right-4 bg-[#8b5a2b] text-white px-4 py-2 rounded-lg shadow-lg transform transition-all duration-300">
+        Message sent successfully!
+    </div>
+
     <!-- Supabase Auth and UI Script -->
     <script>
         // Initialize the Supabase client
         const supabaseUrl = 'https://rxnaepberqsnkmvtwmng.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4bmFlcGJlcnFzbmttdnR3bW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyNDU1MzMsImV4cCI6MjA1OTgyMTUzM30.oCSYR99pGXb6laiaXplzg-G5Y_92PBYXOsijQrW3avo';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Create client with better network retry options
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+            },
+            realtime: {
+                params: {
+                    eventsPerSecond: 10
+                }
+            },
+            global: {
+                fetch: function customFetch(url, options) {
+                    return fetch(url, {
+                        ...options,
+                        signal: options?.signal || (setTimeout(() => { }, 15000) && new AbortController().signal)
+                    });
+                }
+            }
+        });
 
         // DOM Element References
         const signInCard = document.getElementById('sign-in-card');
-        const profileCard = document.getElementById('profile-card');
-        const userInfoDiv = document.getElementById('user-info');
-        const loginBtn = document.getElementById('login');
-        const logoutBtn = document.getElementById('logout');
-        const profilePhoto = document.getElementById('profile-photo');
-        const profileName = document.getElementById('profile-name');
+        const onboardingFlow = document.getElementById('onboarding-flow');
+        const appInterface = document.getElementById('app-interface');
+        const headerNav = document.getElementById('header-nav');
         const loadingScreen = document.getElementById('loading-screen');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Tab references
+        const chatTab = document.getElementById('chat-tab');
+        const profilesTab = document.getElementById('profiles-tab');
+        const myProfileTab = document.getElementById('my-profile-tab');
+        const tabChat = document.getElementById('tab-chat');
+        const tabProfiles = document.getElementById('tab-profiles');
+        const tabMyProfile = document.getElementById('tab-my-profile');
+
+        // Navigation references
+        const navChat = document.getElementById('nav-chat');
+        const navProfiles = document.getElementById('nav-profiles');
+        const navMyProfile = document.getElementById('nav-my-profile');
+
+        // Button references
+        const loginBtn = document.getElementById('login');
+        const logoutAppBtn = document.getElementById('logout-app');
+
+        // Chat-specific references
+        const profilePhotoChat = document.getElementById('profile-photo-chat');
+        const profileNameChat = document.getElementById('profile-name-chat');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const loadingMessages = document.getElementById('loading-messages');
+        const onlineUsers = document.getElementById('online-users');
+
+        // Delete modal references
+        const deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+
+        // Onboarding references
+        const step1Next = document.getElementById('step-1-next');
+        const step2Next = document.getElementById('step-2-next');
+        const step2Back = document.getElementById('step-2-back');
+        const step3Back = document.getElementById('step-3-back');
+        const completeOnboarding = document.getElementById('complete-onboarding');
+        const displayNameInput = document.getElementById('display-name');
+        const bioInput = document.getElementById('bio');
+        const skillOptions = document.getElementById('skill-options');
+        const selectedSkills = document.getElementById('selected-skills');
+        const addCustomSkillBtn = document.getElementById('add-custom-skill');
+        const customSkillInput = document.getElementById('custom-skill');
+        const roleBishop = document.getElementById('role-bishop');
+        const roleKnight = document.getElementById('role-knight');
+        const bishopCount = document.getElementById('bishop-count');
+        const knightCount = document.getElementById('knight-count');
+
+        // Profile modal references
+        const userProfileModal = document.getElementById('user-profile-modal');
+        const closeProfileModal = document.getElementById('close-profile-modal');
+        const modalProfilePhoto = document.getElementById('modal-profile-photo');
+        const modalProfileName = document.getElementById('modal-profile-name');
+        const modalProfileRole = document.getElementById('modal-profile-role');
+        const modalProfileStatus = document.getElementById('modal-profile-status');
+        const modalProfileBio = document.getElementById('modal-profile-bio');
+        const modalProfileSkills = document.getElementById('modal-profile-skills');
+        const modalRecentMessages = document.getElementById('modal-recent-messages');
+
+        // Edit profile modal references
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const closeEditModal = document.getElementById('close-edit-modal');
+        const editProfileForm = document.getElementById('edit-profile-form');
+        const editDisplayName = document.getElementById('edit-display-name');
+        const editBio = document.getElementById('edit-bio');
+        const editSkillOptions = document.getElementById('edit-skill-options');
+        const editSelectedSkills = document.getElementById('edit-selected-skills');
+        const editAddSkill = document.getElementById('edit-add-skill');
+        const editCustomSkill = document.getElementById('edit-custom-skill');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+
+        // My profile references
+        const myProfilePhoto = document.getElementById('my-profile-photo');
+        const myProfileName = document.getElementById('my-profile-name');
+        const myProfileRoleBadge = document.getElementById('my-profile-role-badge');
+        const myProfileEmail = document.getElementById('my-profile-email');
+        const myProfileBio = document.getElementById('my-profile-bio');
+        const myProfileSkills = document.getElementById('my-profile-skills');
+        const myRecentMessages = document.getElementById('my-recent-messages');
+
+        // Profiles tab references
+        const membersGrid = document.getElementById('members-grid');
+        const userSearch = document.getElementById('user-search');
+        const filterAll = document.getElementById('filter-all');
+        const filterOnline = document.getElementById('filter-online');
+        const filterBishops = document.getElementById('filter-bishops');
+        const filterKnights = document.getElementById('filter-knights');
+
+        // Current state variables
+        let currentUser = null;
+        let userProfile = null;
+        let messageCache = new Map();
+        let isFirstLoad = true;
+        let currentChannel = null;
+        let messageToDelete = null;
+        let selectedRole = null;
+        let selectedSkillsArray = [];
+        let editSelectedSkillsArray = [];
+        let userProfiles = [];
+        let currentFilter = 'all';
+        let activeTab = 'chat';
+
+        // Show toast message with animation
+        function showToast(message, duration = 3000) {
+            toastMessage.textContent = message;
+            toastMessage.classList.remove('hidden');
+            toastMessage.classList.add('animate-fadeSlideUp');
+
+            setTimeout(() => {
+                toastMessage.classList.remove('animate-fadeSlideUp');
+                toastMessage.classList.add('opacity-0');
+                setTimeout(() => {
+                    toastMessage.classList.add('hidden');
+                    toastMessage.classList.remove('opacity-0');
+                }, 300);
+            }, duration);
+        }
 
         // Loading Screen Control
         function showLoading(show) {
@@ -136,55 +938,1888 @@
                 loadingScreen.classList.add('hidden');
             }
         }
+
+        // Show/hide message loading indicator
+        function showMessageLoading(show) {
+            if (show) {
+                loadingMessages.classList.remove('hidden');
+            } else {
+                loadingMessages.classList.add('hidden');
+            }
+        }
+
         // Initially show loading screen
         showLoading(true);
 
-        // Update UI based on session
-        async function updateUI(session) {
-            if (session && session.user) {
-                signInCard.classList.add('hidden');
-                profileCard.classList.remove('hidden');
+        // Escape HTML to prevent XSS
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g,
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag]));
+        }
 
-                const displayName = session.user.user_metadata.full_name || session.user.email || "User";
-                const photoURL = session.user.user_metadata.avatar_url || "https://via.placeholder.com/100";
+        // Create necessary tables if they don't exist
+        async function setupDatabase() {
+            try {
+                console.log('Checking database setup...');
 
-                profilePhoto.src = photoURL;
-                profileName.textContent = displayName;
-            } else {
-                signInCard.classList.remove('hidden');
-                profileCard.classList.add('hidden');
-                userInfoDiv.innerHTML = "";
+                // Check if user_profiles table exists
+                const { error: profilesError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('id')
+                    .limit(1);
+
+                if (profilesError && profilesError.code === '42P01') {
+                    console.log('Creating user_profiles table...');
+
+                    // Create user_profiles table
+                    const { error } = await supabaseClient.rpc('create_user_profiles_table');
+
+                    if (error) {
+                        console.error('Error creating user_profiles table:', error);
+                        // Create the table using SQL instead
+                        await supabaseClient.rpc('execute_sql', {
+                            sql_query: `
+                                CREATE TABLE IF NOT EXISTS public.user_profiles (
+                                    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+                                    display_name TEXT,
+                                    bio TEXT,
+                                    skills TEXT[],
+                                    role TEXT,
+                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                                );
+                                
+                                ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+                                
+                                CREATE POLICY "Users can view all profiles"
+                                    ON public.user_profiles
+                                    FOR SELECT
+                                    USING (true);
+                                    
+                                CREATE POLICY "Users can update their own profile"
+                                    ON public.user_profiles
+                                    FOR UPDATE
+                                    USING (auth.uid() = id);
+                                    
+                                CREATE POLICY "Users can insert their own profile"
+                                    ON public.user_profiles
+                                    FOR INSERT
+                                    WITH CHECK (auth.uid() = id);
+                            `
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error setting up database:', error);
+                showToast('Error setting up database. Some features may not work properly.', 5000);
             }
         }
+
+        // Check if user has completed onboarding
+        async function checkUserOnboarding(userId) {
+            try {
+                console.log('Checking if user has completed onboarding...');
+
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        console.log('User has not completed onboarding');
+                        return false;
+                    }
+                    throw error;
+                }
+
+                console.log('User profile found:', data);
+                userProfile = data;
+                return true;
+            } catch (error) {
+                console.error('Error checking user onboarding:', error);
+                return false;
+            }
+        }
+
+        // Get role counts for bishop and knight
+        async function getRoleCounts() {
+            try {
+                const { data: bishops, error: bishopsError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('id')
+                    .eq('role', 'bishop');
+
+                if (bishopsError) throw bishopsError;
+
+                const { data: knights, error: knightsError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('id')
+                    .eq('role', 'knight');
+
+                if (knightsError) throw knightsError;
+
+                const bishopCount = bishops?.length || 0;
+                const knightCount = knights?.length || 0;
+
+                return { bishopCount, knightCount };
+            } catch (error) {
+                console.error('Error getting role counts:', error);
+                return { bishopCount: 0, knightCount: 0 };
+            }
+        }
+
+        // Complete user onboarding
+        async function completeUserOnboarding(userData) {
+            try {
+                console.log('Completing user onboarding with data:', userData);
+
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .insert([
+                        {
+                            id: currentUser.id,
+                            display_name: userData.displayName,
+                            bio: userData.bio,
+                            skills: userData.skills,
+                            role: userData.role
+                        }
+                    ])
+                    .select();
+
+                if (error) throw error;
+
+                console.log('Onboarding complete, user profile created:', data);
+                userProfile = data[0];
+                return true;
+            } catch (error) {
+                console.error('Error completing onboarding:', error);
+                showToast('Error saving profile. Please try again.', 5000);
+                return false;
+            }
+        }
+
+        // Update user profile
+        async function updateUserProfile(userData) {
+            try {
+                console.log('Updating user profile with data:', userData);
+
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .update({
+                        display_name: userData.displayName,
+                        bio: userData.bio,
+                        skills: userData.skills,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentUser.id)
+                    .select();
+
+                if (error) throw error;
+
+                console.log('Profile updated:', data);
+                userProfile = data[0];
+                return true;
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showToast('Error updating profile. Please try again.', 5000);
+                return false;
+            }
+        }
+
+        // Load all user profiles
+        async function loadUserProfiles() {
+            try {
+                console.log('Loading user profiles...');
+
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .select('*');
+
+                if (error) throw error;
+
+                userProfiles = data || [];
+                console.log('Loaded user profiles:', userProfiles.length);
+
+                return userProfiles;
+            } catch (error) {
+                console.error('Error loading user profiles:', error);
+                showToast('Error loading user profiles. Please refresh the page.', 5000);
+                return [];
+            }
+        }
+
+        // Get user presence status
+        async function getUserPresence(userId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_presence')
+                    .select('is_online, last_seen')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        return { isOnline: false, lastSeen: null };
+                    }
+                    throw error;
+                }
+
+                return {
+                    isOnline: data.is_online,
+                    lastSeen: data.last_seen
+                };
+            } catch (error) {
+                console.error('Error getting user presence:', error);
+                return { isOnline: false, lastSeen: null };
+            }
+        }
+
+        // Get user's recent messages
+        async function getUserRecentMessages(userId, limit = 5) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false })
+                    .limit(limit);
+
+                if (error) throw error;
+
+                return data || [];
+            } catch (error) {
+                console.error('Error getting user recent messages:', error);
+                return [];
+            }
+        }
+
+        // Format time elapsed since a date
+        function formatTimeElapsed(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const elapsed = now - date;
+
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return `${days} day${days === 1 ? '' : 's'} ago`;
+            } else if (hours > 0) {
+                return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+            } else if (minutes > 0) {
+                return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+            } else {
+                return 'Just now';
+            }
+        }
+
+        // Show user profile modal
+        async function showUserProfile(userId) {
+            try {
+                console.log('Showing profile for user:', userId);
+
+                // Find user profile
+                const profile = userProfiles.find(p => p.id === userId);
+                if (!profile) {
+                    showToast('User profile not found.', 3000);
+                    return;
+                }
+
+                // Get user auth data for additional info
+                const { data: userData, error: userError } = await supabaseClient
+                    .from('users')
+                    .select('email, raw_user_meta_data')
+                    .eq('id', userId)
+                    .single();
+
+                if (userError && userError.code !== 'PGRST116') {
+                    console.error('Error fetching user data:', userError);
+                }
+
+                // Get presence status
+                const presence = await getUserPresence(userId);
+
+                // Get recent messages
+                const recentMessages = await getUserRecentMessages(userId, 3);
+
+                // Update modal content
+                modalProfileName.textContent = profile.display_name || 'Unnamed User';
+                modalProfilePhoto.src = userData?.raw_user_meta_data?.avatar_url || 'https://via.placeholder.com/100';
+                modalProfileBio.textContent = profile.bio || 'No bio available.';
+
+                // Set role badge
+                if (profile.role) {
+                    modalProfileRole.innerHTML = `
+                        <span class="role-badge ${profile.role.toLowerCase()}">
+                            ${profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+                        </span>
+                    `;
+                } else {
+                    modalProfileRole.innerHTML = '';
+                }
+
+                // Set online status
+                if (presence.isOnline) {
+                    modalProfileStatus.innerHTML = '<span class="text-green-500">● Online now</span>';
+                } else if (presence.lastSeen) {
+                    modalProfileStatus.innerHTML = `Last seen ${formatTimeElapsed(presence.lastSeen)}`;
+                } else {
+                    modalProfileStatus.innerHTML = 'Offline';
+                }
+
+                // Set skills
+                modalProfileSkills.innerHTML = '';
+                if (profile.skills && profile.skills.length > 0) {
+                    profile.skills.forEach(skill => {
+                        const skillTag = document.createElement('span');
+                        skillTag.classList.add('skill-tag');
+                        skillTag.textContent = skill;
+                        modalProfileSkills.appendChild(skillTag);
+                    });
+                } else {
+                    modalProfileSkills.innerHTML = '<span class="text-[#a08068]">No skills listed</span>';
+                }
+
+                // Set recent messages
+                modalRecentMessages.innerHTML = '';
+                if (recentMessages.length > 0) {
+                    recentMessages.forEach(msg => {
+                        const messageItem = document.createElement('div');
+                        messageItem.classList.add('mb-2', 'pb-2', 'border-b', 'border-[#3c2f24]', 'text-sm');
+                        messageItem.innerHTML = `
+                            <p class="text-[#e0d2c3]">"${escapeHTML(msg.message)}"</p>
+                            <p class="text-xs text-[#a08068] mt-1">${formatTimeElapsed(msg.created_at)}</p>
+                        `;
+                        modalRecentMessages.appendChild(messageItem);
+                    });
+                } else {
+                    modalRecentMessages.innerHTML = '<span class="text-[#a08068]">No recent messages</span>';
+                }
+
+                // Show the modal
+                userProfileModal.classList.add('show');
+
+            } catch (error) {
+                console.error('Error showing user profile:', error);
+                showToast('Error loading user profile.', 3000);
+            }
+        }
+
+        // Render members in the profiles tab
+        function renderMembers(filter = 'all', searchTerm = '') {
+            try {
+                console.log('Rendering members with filter:', filter, 'and search term:', searchTerm);
+
+                membersGrid.innerHTML = '';
+
+                let filteredProfiles = [...userProfiles];
+
+                // Apply filter
+                if (filter === 'online') {
+                    filteredProfiles = filteredProfiles.filter(profile => {
+                        const userPresence = userPresences.find(p => p.user_id === profile.id);
+                        return userPresence && userPresence.is_online;
+                    });
+                } else if (filter === 'bishops') {
+                    filteredProfiles = filteredProfiles.filter(profile => profile.role === 'bishop');
+                } else if (filter === 'knights') {
+                    filteredProfiles = filteredProfiles.filter(profile => profile.role === 'knight');
+                }
+
+                // Apply search
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredProfiles = filteredProfiles.filter(profile =>
+                        (profile.display_name && profile.display_name.toLowerCase().includes(term)) ||
+                        (profile.bio && profile.bio.toLowerCase().includes(term)) ||
+                        (profile.skills && profile.skills.some(skill => skill.toLowerCase().includes(term)))
+                    );
+                }
+
+                if (filteredProfiles.length === 0) {
+                    membersGrid.innerHTML = `
+                        <div class="col-span-full text-center p-8 text-[#a08068]">
+                            No members found that match your criteria.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render each profile card
+                filteredProfiles.forEach(async profile => {
+                    // Get user metadata for avatar
+                    const { data: userData } = await supabaseClient
+                        .from('users')
+                        .select('raw_user_meta_data')
+                        .eq('id', profile.id)
+                        .single();
+
+                    const avatarUrl = userData?.raw_user_meta_data?.avatar_url || 'https://via.placeholder.com/100';
+
+                    // Get online status
+                    const presence = await getUserPresence(profile.id);
+                    const isOnline = presence.isOnline;
+
+                    const profileCard = document.createElement('div');
+                    profileCard.classList.add('profile-card', 'p-4');
+                    profileCard.setAttribute('data-user-id', profile.id);
+
+                    profileCard.innerHTML = `
+                        <div class="flex items-center mb-3">
+                            <div class="relative">
+                                <img src="${avatarUrl}" alt="${escapeHTML(profile.display_name || 'User')}" class="w-14 h-14 rounded-full border-2 border-[#8b5a2b]">
+                                ${isOnline ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-[#2a2018]"></div>' : ''}
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="font-bold text-[#d4a76a]">${escapeHTML(profile.display_name || 'Unnamed User')}</h3>
+                                ${profile.role ? `<span class="role-badge ${profile.role.toLowerCase()}">${profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}</span>` : ''}
+                            </div>
+                        </div>
+                        <p class="text-sm text-[#e0d2c3] mb-3 line-clamp-2">${escapeHTML(profile.bio || 'No bio available.')}</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${profile.skills && profile.skills.slice(0, 3).map(skill =>
+                        `<span class="skill-tag">${escapeHTML(skill)}</span>`
+                    ).join('') || '<span class="text-xs text-[#a08068]">No skills listed</span>'}
+                            ${profile.skills && profile.skills.length > 3 ? `<span class="text-xs text-[#a08068]">+${profile.skills.length - 3} more</span>` : ''}
+                        </div>
+                        <button class="view-profile-btn w-full py-1 px-3 rounded bg-[#3c2f24] text-[#d4a76a] text-sm hover:bg-[#4d3d30] transition-colors">View Profile</button>
+                    `;
+
+                    membersGrid.appendChild(profileCard);
+
+                    // Add click event to view profile
+                    const viewProfileBtn = profileCard.querySelector('.view-profile-btn');
+                    viewProfileBtn.addEventListener('click', () => {
+                        showUserProfile(profile.id);
+                    });
+
+                    // Make the whole card clickable
+                    profileCard.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('view-profile-btn')) {
+                            showUserProfile(profile.id);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error rendering members:', error);
+                membersGrid.innerHTML = `
+                    <div class="col-span-full text-center p-8 text-red-500">
+                        Error loading members. Please refresh the page.
+                    </div>
+                `;
+            }
+        }
+
+        // Update My Profile tab with user data
+        function updateMyProfileTab() {
+            try {
+                if (!currentUser || !userProfile) return;
+
+                myProfileName.textContent = userProfile.display_name || currentUser.user_metadata?.full_name || currentUser.email;
+                myProfileEmail.textContent = currentUser.email;
+                myProfilePhoto.src = currentUser.user_metadata?.avatar_url || 'https://via.placeholder.com/100';
+                myProfileBio.textContent = userProfile.bio || 'No bio available. Click "Edit Profile" to add one.';
+
+                // Set role badge
+                if (userProfile.role) {
+                    myProfileRoleBadge.innerHTML = `
+                        <span class="role-badge ${userProfile.role.toLowerCase()}">
+                            ${userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)}
+                        </span>
+                    `;
+                } else {
+                    myProfileRoleBadge.innerHTML = '';
+                }
+
+                // Set skills
+                myProfileSkills.innerHTML = '';
+                if (userProfile.skills && userProfile.skills.length > 0) {
+                    userProfile.skills.forEach(skill => {
+                        const skillTag = document.createElement('span');
+                        skillTag.classList.add('skill-tag');
+                        skillTag.textContent = skill;
+                        myProfileSkills.appendChild(skillTag);
+                    });
+                } else {
+                    myProfileSkills.innerHTML = '<span class="text-[#a08068]">No skills listed</span>';
+                }
+
+                // Load recent messages
+                loadMyRecentMessages();
+
+            } catch (error) {
+                console.error('Error updating my profile tab:', error);
+            }
+        }
+
+        // Load user's recent messages for My Profile tab
+        async function loadMyRecentMessages() {
+            try {
+                if (!currentUser) return;
+
+                const recentMessages = await getUserRecentMessages(currentUser.id, 5);
+
+                myRecentMessages.innerHTML = '';
+
+                if (recentMessages.length === 0) {
+                    myRecentMessages.innerHTML = `
+                        <div class="text-center text-[#a08068] p-4">
+                            You haven't sent any messages yet.
+                        </div>
+                    `;
+                    return;
+                }
+
+                recentMessages.forEach(msg => {
+                    const messageItem = document.createElement('div');
+                    messageItem.classList.add('bg-[#1a1611]', 'p-3', 'rounded-lg', 'mb-3');
+                    messageItem.innerHTML = `
+                        <p class="text-[#e0d2c3]">"${escapeHTML(msg.message)}"</p>
+                        <p class="text-xs text-[#a08068] mt-2 text-right">${formatTimeElapsed(msg.created_at)}</p>
+                    `;
+                    myRecentMessages.appendChild(messageItem);
+                });
+
+            } catch (error) {
+                console.error('Error loading my recent messages:', error);
+                myRecentMessages.innerHTML = `
+                    <div class="text-center text-red-500 p-4">
+                        Error loading messages. Please refresh the page.
+                    </div>
+                `;
+            }
+        }
+
+        // Populate edit profile form
+        function populateEditProfileForm() {
+            try {
+                if (!userProfile) return;
+
+                editDisplayName.value = userProfile.display_name || '';
+                editBio.value = userProfile.bio || '';
+
+                // Reset selected skills
+                editSelectedSkillsArray = [...(userProfile.skills || [])];
+
+                // Populate skill options
+                const commonSkills = ['Strategy', 'Intelligence', 'Logistics', 'Negotiation', 'Leadership', 'Analysis', 'Planning', 'Communication', 'Tactics', 'Research'];
+
+                editSkillOptions.innerHTML = '';
+                commonSkills.forEach(skill => {
+                    const skillOption = document.createElement('div');
+                    skillOption.classList.add('skill-option', 'cursor-pointer', 'px-3', 'py-1', 'rounded-full', 'border', 'border-[#8b5a2b]', 'hover:bg-[#3c2f24]', 'transition-colors');
+
+                    if (editSelectedSkillsArray.includes(skill)) {
+                        skillOption.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                    }
+
+                    skillOption.textContent = skill;
+                    skillOption.setAttribute('data-skill', skill);
+
+                    skillOption.addEventListener('click', () => {
+                        const skill = skillOption.getAttribute('data-skill');
+                        const index = editSelectedSkillsArray.indexOf(skill);
+
+                        if (index === -1) {
+                            // Add skill
+                            editSelectedSkillsArray.push(skill);
+                            skillOption.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                        } else {
+                            // Remove skill
+                            editSelectedSkillsArray.splice(index, 1);
+                            skillOption.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                        }
+
+                        updateEditSelectedSkills();
+                    });
+
+                    editSkillOptions.appendChild(skillOption);
+                });
+
+                // Update selected skills display
+                updateEditSelectedSkills();
+
+            } catch (error) {
+                console.error('Error populating edit profile form:', error);
+                showToast('Error loading profile data.', 3000);
+            }
+        }
+
+        // Update selected skills in edit profile form
+        function updateEditSelectedSkills() {
+            editSelectedSkills.innerHTML = '';
+
+            if (editSelectedSkillsArray.length === 0) {
+                editSelectedSkills.innerHTML = '<span class="text-[#a08068]">No skills selected</span>';
+                return;
+            }
+
+            editSelectedSkillsArray.forEach(skill => {
+                const skillTag = document.createElement('div');
+                skillTag.classList.add('skill-tag', 'relative');
+
+                skillTag.innerHTML = `
+                    ${escapeHTML(skill)}
+                    <span class="ml-2 cursor-pointer" data-skill="${escapeHTML(skill)}">×</span>
+                `;
+
+                editSelectedSkills.appendChild(skillTag);
+
+                // Add remove event
+                const removeBtn = skillTag.querySelector('span');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const skill = removeBtn.getAttribute('data-skill');
+                    const index = editSelectedSkillsArray.indexOf(skill);
+
+                    if (index !== -1) {
+                        editSelectedSkillsArray.splice(index, 1);
+                        updateEditSelectedSkills();
+
+                        // Update skill option if it exists
+                        const skillOption = editSkillOptions.querySelector(`[data-skill="${skill}"]`);
+                        if (skillOption) {
+                            skillOption.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Switch between tabs
+        function switchTab(tabName) {
+            activeTab = tabName;
+
+            // Update tab buttons
+            tabChat.classList.remove('active');
+            tabProfiles.classList.remove('active');
+            tabMyProfile.classList.remove('active');
+
+            // Hide all tab content
+            chatTab.classList.add('hidden');
+            profilesTab.classList.add('hidden');
+            myProfileTab.classList.add('hidden');
+
+            // Show selected tab
+            if (tabName === 'chat') {
+                tabChat.classList.add('active');
+                chatTab.classList.remove('hidden');
+                setTimeout(() => scrollToBottom(), 100);
+            } else if (tabName === 'profiles') {
+                tabProfiles.classList.add('active');
+                profilesTab.classList.remove('hidden');
+                loadUserProfiles().then(() => renderMembers(currentFilter, userSearch.value));
+            } else if (tabName === 'my-profile') {
+                tabMyProfile.classList.add('active');
+                myProfileTab.classList.remove('hidden');
+                updateMyProfileTab();
+            }
+        }
+
+        // Navigate to onboarding step
+        function goToOnboardingStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.onboarding-step').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('hidden');
+            });
+
+            // Show the requested step
+            const stepElement = document.getElementById(`onboarding-step-${step}`);
+            stepElement.classList.remove('hidden');
+            setTimeout(() => stepElement.classList.add('active'), 10);
+
+            // Update progress indicators
+            for (let i = 1; i <= 3; i++) {
+                const indicator = document.getElementById(`step-indicator-${i}`);
+                const connector = document.getElementById(`step-connector-${i}`);
+
+                if (i < step) {
+                    indicator.classList.add('completed');
+                    if (connector) connector.classList.add('completed');
+                } else if (i === step) {
+                    indicator.classList.add('completed');
+                    if (connector) connector.classList.remove('completed');
+                } else {
+                    indicator.classList.remove('completed');
+                    if (connector) connector.classList.remove('completed');
+                }
+            }
+        }
+
+        // Update UI based on session and onboarding status
+        async function updateUI(session) {
+            try {
+                if (session && session.user) {
+                    currentUser = session.user;
+                    const displayName = session.user.user_metadata?.full_name || session.user.email || "User";
+                    const photoURL = session.user.user_metadata?.avatar_url || "https://via.placeholder.com/100";
+
+                    console.log('User logged in:', displayName);
+
+                    // Check if database is set up
+                    await setupDatabase();
+
+                    // Check if user has completed onboarding
+                    const hasCompletedOnboarding = await checkUserOnboarding(currentUser.id);
+
+                    if (hasCompletedOnboarding) {
+                        // User has completed onboarding, show main app
+                        signInCard.classList.add('hidden');
+                        onboardingFlow.classList.add('hidden');
+                        appInterface.classList.remove('hidden');
+                        headerNav.classList.remove('hidden');
+
+                        // Update profile photo and name in chat header
+                        profilePhotoChat.src = photoURL;
+                        profileNameChat.textContent = userProfile.display_name || displayName;
+
+                        // Reset message cache before loading messages
+                        messageCache.clear();
+
+                        // Clear existing messages if it's first load
+                        if (isFirstLoad) {
+                            messagesContainer.innerHTML = '<div class="text-center text-[#a08068] text-sm my-4 p-2 bg-[#1a1611] bg-opacity-40 rounded-lg">— Welcome to the War Room Trenches —<div class="mt-2 text-xs text-[#a08068]">The place where strategies are forged</div></div>';
+                            isFirstLoad = false;
+                        }
+
+                        // Load messages
+                        await loadMessages();
+
+                        // Subscribe to new messages
+                        subscribeToMessages();
+
+                        // Set user as online
+                        updatePresence(true);
+
+                        // Load user profiles for the profiles tab
+                        await loadUserProfiles();
+
+                        // Update My Profile tab
+                        updateMyProfileTab();
+
+                        // Focus the message input if we're on the chat tab
+                        if (activeTab === 'chat') {
+                            setTimeout(() => {
+                                messageInput.focus();
+                            }, 500);
+                        }
+
+                    } else {
+                        // User needs to complete onboarding
+                        signInCard.classList.add('hidden');
+                        appInterface.classList.add('hidden');
+                        headerNav.classList.add('hidden');
+                        onboardingFlow.classList.remove('hidden');
+
+                        // Pre-fill display name if available
+                        if (displayName) {
+                            displayNameInput.value = displayName;
+                        }
+
+                        // Get role counts for bishop and knight
+                        const { bishopCount, knightCount } = await getRoleCounts();
+
+                        // Update role counts in the UI
+                        bishopCount.textContent = `${bishopCount}/2 filled`;
+                        knightCount.textContent = `${knightCount}/2 filled`;
+
+                        // Disable role selection if full
+                        if (bishopCount >= 2) {
+                            roleBishop.classList.add('opacity-50', 'cursor-not-allowed');
+                            roleBishop.setAttribute('disabled', 'true');
+                        }
+
+                        if (knightCount >= 2) {
+                            roleKnight.classList.add('opacity-50', 'cursor-not-allowed');
+                            roleKnight.setAttribute('disabled', 'true');
+                        }
+
+                        // Show step 1
+                        goToOnboardingStep(1);
+                    }
+
+                } else {
+                    // No user session, show sign in card
+                    signInCard.classList.remove('hidden');
+                    onboardingFlow.classList.add('hidden');
+                    appInterface.classList.add('hidden');
+                    headerNav.classList.add('hidden');
+
+                    if (currentUser) {
+                        // Set user as offline before clearing
+                        updatePresence(false);
+                    }
+
+                    currentUser = null;
+                    userProfile = null;
+
+                    // Clean up subscription
+                    if (currentChannel) {
+                        supabaseClient.removeChannel(currentChannel);
+                        currentChannel = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating UI:', error);
+                showToast('An error occurred. Please refresh the page.', 5000);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Track user presence
+        async function updatePresence(isOnline) {
+            if (!currentUser) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('user_presence')
+                    .upsert({
+                        user_id: currentUser.id,
+                        is_online: isOnline,
+                        last_seen: new Date().toISOString(),
+                        user_name: userProfile?.display_name || currentUser.user_metadata?.full_name || currentUser.email || "User"
+                    });
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error updating presence:', error);
+            }
+        }
+
+        // Subscribe to presence changes
+        function subscribeToPresence() {
+            const presenceChannel = supabaseClient
+                .channel('presence-channel')
+                .on('presence', { event: 'sync' }, () => {
+                    updateOnlineUserCount();
+                })
+                .subscribe();
+        }
+
+        // Update online user count
+        async function updateOnlineUserCount() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_presence')
+                    .select('user_name')
+                    .eq('is_online', true);
+
+                if (error) throw error;
+
+                const count = data?.length || 0;
+                onlineUsers.innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                    <span class="text-[#a08068]">${count} online</span>
+                `;
+            } catch (error) {
+                console.error('Error getting online users:', error);
+                onlineUsers.innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                    <span class="text-[#a08068]">Users online</span>
+                `;
+            }
+        }
+
+        // Subscribe to new messages with improved duplicate handling
+        function subscribeToMessages() {
+            // First remove any existing subscription
+            if (currentChannel) {
+                supabaseClient.removeChannel(currentChannel);
+                currentChannel = null;
+            }
+
+            // Create a new subscription
+            currentChannel = supabaseClient
+                .channel('public:messages')
+                .on('postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'messages'
+                    },
+                    payload => {
+                        console.log('New message received:', payload.new);
+
+                        // Use unique ID as a key for checking duplicates
+                        if (!messageCache.has(payload.new.id)) {
+                            displayMessage(payload.new);
+                            messageCache.set(payload.new.id, payload.new);
+                            scrollToBottom();
+                        } else {
+                            console.log('Duplicate message detected and skipped:', payload.new.id);
+                        }
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('Subscription status:', status);
+                });
+
+            console.log('Subscribed to messages channel');
+        }
+
+        // Group messages by date
+        function groupMessagesByDate(messages) {
+            const groups = {};
+
+            messages.forEach(message => {
+                const date = new Date(message.created_at);
+                const dateKey = date.toDateString();
+
+                if (!groups[dateKey]) {
+                    groups[dateKey] = [];
+                }
+
+                groups[dateKey].push(message);
+            });
+
+            return groups;
+        }
+
+        // Format date for display
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday';
+            } else {
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        // Load messages from Supabase with improved handling
+        async function loadMessages() {
+            // Show loading indicator
+            showMessageLoading(true);
+
+            try {
+                console.log('Loading messages...');
+
+                // Use a limit for efficiency
+                const PAGE_SIZE = 50;
+                const { data: messages, error } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: true })
+                    .limit(PAGE_SIZE);
+
+                if (error) {
+                    console.error('Error fetching messages:', error);
+                    throw error;
+                }
+
+                console.log('Loaded messages:', messages?.length || 0);
+
+                // Cache the messages using their IDs as keys
+                messageCache.clear(); // Clear existing cache
+                if (messages) {
+                    messages.forEach(message => {
+                        messageCache.set(message.id, message);
+                    });
+                }
+
+                // Group messages by date
+                const messageGroups = groupMessagesByDate(messages || []);
+
+                // Clear existing messages before adding new ones
+                // Keep only the welcome message
+                const welcomeMessage = messagesContainer.querySelector('.text-center');
+                messagesContainer.innerHTML = '';
+                messagesContainer.appendChild(welcomeMessage);
+
+                // Display messages grouped by date
+                const dateKeys = Object.keys(messageGroups);
+
+                for (let i = 0; i < dateKeys.length; i++) {
+                    const dateKey = dateKeys[i];
+                    const groupMessages = messageGroups[dateKey];
+
+                    // Add date divider
+                    const dateElement = document.createElement('div');
+                    dateElement.classList.add('date-divider');
+                    dateElement.innerHTML = `<span class="text-xs text-[#a08068] px-2">${formatDateForDisplay(dateKey)}</span>`;
+                    messagesContainer.appendChild(dateElement);
+
+                    // Display messages for this date
+                    groupMessages.forEach(message => {
+                        displayMessage(message);
+                    });
+                }
+
+                // Hide loading indicator
+                showMessageLoading(false);
+
+                // Scroll to bottom
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error loading messages:', error.message);
+                messagesContainer.innerHTML += `
+                    <div class="text-center text-red-500 text-sm my-4">
+                        Error loading messages. Please refresh and try again.
+                    </div>
+                `;
+                showMessageLoading(false);
+            }
+        }
+
+        // Display a message in the UI with better error handling
+        function displayMessage(message) {
+            try {
+                if (!message || !message.user_id || !message.message) {
+                    console.error('Invalid message object:', message);
+                    return;
+                }
+
+                // First check if this message is already displayed (by ID)
+                const existingMessageElement = document.querySelector(`[data-message-id="${message.id}"]`);
+                if (existingMessageElement) {
+                    console.log('Message already displayed, skipping:', message.id);
+                    return;
+                }
+
+                const isCurrentUser = currentUser && message.user_id === currentUser.id;
+                const messageElement = document.createElement('div');
+
+                messageElement.classList.add(
+                    'message-wrapper',
+                    'flex',
+                    isCurrentUser ? 'justify-end' : 'justify-start',
+                    'animate-fadeSlideUp',
+                    'mb-4' // Add spacing between messages
+                );
+
+                // Add message ID as a data attribute for duplicate detection
+                messageElement.setAttribute('data-message-id', message.id);
+
+                messageElement.innerHTML = `
+                    <div class="flex ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} items-end max-w-[85%]">
+                        <img class="w-8 h-8 rounded-full ${isCurrentUser ? 'ml-2' : 'mr-2'} border border-[#d4a76a] cursor-pointer" 
+                            src="${message.sender_avatar || 'https://via.placeholder.com/100'}" 
+                            alt="${escapeHTML(message.sender_name || 'User')}"
+                            data-user-id="${message.user_id}">
+                        <div class="message-bubble ${isCurrentUser ? 'message-bubble-mine' : 'message-bubble-others'} relative group">
+                            ${!isCurrentUser ? `<p class="text-xs text-[#d4a76a] font-bold mb-1 cursor-pointer" data-user-id="${message.user_id}">${escapeHTML(message.sender_name || 'User')}</p>` : ''}
+                            <p class="break-words">${escapeHTML(message.message)}</p>
+                            <p class="text-xs opacity-70 text-right mt-1">${formatTimestamp(message.created_at)}</p>
+                            ${isCurrentUser ? `
+                                <button class="delete-message-btn opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                                    data-message-id="${message.id}">
+                                    ×
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                // Hide loading messages indicator if it's visible
+                showMessageLoading(false);
+
+                // Append to container
+                messagesContainer.appendChild(messageElement);
+
+                // Add event listener for delete button
+                if (isCurrentUser) {
+                    const deleteButton = messageElement.querySelector('.delete-message-btn');
+                    if (deleteButton) {
+                        deleteButton.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const messageId = deleteButton.getAttribute('data-message-id');
+                            if (messageId) {
+                                confirmDeleteMessage(messageId);
+                            }
+                        });
+                    }
+                }
+
+                // Add event listener for user profile click
+                const userImage = messageElement.querySelector('img[data-user-id]');
+                if (userImage) {
+                    userImage.addEventListener('click', () => {
+                        const userId = userImage.getAttribute('data-user-id');
+                        if (userId) {
+                            showUserProfile(userId);
+                        }
+                    });
+                }
+
+                const userName = messageElement.querySelector('p[data-user-id]');
+                if (userName) {
+                    userName.addEventListener('click', () => {
+                        const userId = userName.getAttribute('data-user-id');
+                        if (userId) {
+                            showUserProfile(userId);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error displaying message:', error);
+            }
+        }
+
+        // Format timestamp with improved format
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Scroll to bottom of messages container with smooth animation
+        function scrollToBottom() {
+            messagesContainer.scrollTo({
+                top: messagesContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Handle message form submission with improved error handling
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const messageText = messageInput.value.trim();
+            if (!messageText) return;
+
+            // Disable the input and button while sending
+            messageInput.disabled = true;
+            const submitButton = messageForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <div class="w-5 h-5 border-2 border-t-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            `;
+
+            // Clear input
+            messageInput.value = '';
+
+            try {
+                console.log('Sending message:', messageText);
+
+                // Check if user is authenticated
+                if (!currentUser || !currentUser.id) {
+                    throw new Error('You need to be logged in to send messages.');
+                }
+
+                // Get display name from profile if available
+                const displayName = userProfile?.display_name ||
+                    currentUser.user_metadata?.full_name ||
+                    currentUser.email ||
+                    "User";
+
+                // Send message to Supabase
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert({
+                        user_id: currentUser.id,
+                        message: messageText,
+                        sender_name: displayName,
+                        sender_avatar: currentUser.user_metadata?.avatar_url || "https://via.placeholder.com/100"
+                    })
+                    .select();
+
+                if (error) {
+                    console.error('Supabase error details:', error);
+                    throw error;
+                }
+
+                console.log('Message sent successfully:', data);
+
+                // Show success toast
+                showToast('Message sent successfully!');
+
+                // Add a subtle notification sound
+                const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_d0c2c2c813.mp3?filename=notification-sound-7062.mp3');
+                audio.volume = 0.2;
+                audio.play().catch(e => console.log('Audio play prevented:', e));
+            } catch (error) {
+                console.error('Error sending message:', error);
+
+                // More descriptive error message with specific error details
+                const errorMessage = error.message || 'Unknown error occurred';
+                showToast(`Message failed: ${errorMessage}`, 5000);
+
+                // Put the message back in the input
+                messageInput.value = messageText;
+            } finally {
+                // Re-enable the input and button
+                messageInput.disabled = false;
+                submitButton.disabled = false;
+                submitButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                `;
+                messageInput.focus();
+            }
+        });
+
+        // Confirm delete message modal
+        function confirmDeleteMessage(messageId) {
+            messageToDelete = messageId;
+            deleteConfirmationModal.classList.add('show');
+        }
+
+        // Close delete confirmation modal
+        function closeDeleteModal() {
+            deleteConfirmationModal.classList.remove('show');
+            messageToDelete = null;
+        }
+
+        // Delete message from Supabase and UI
+        async function deleteMessage(messageId) {
+            try {
+                showToast('Deleting message...', 2000);
+
+                // Delete from Supabase
+                const { error } = await supabaseClient
+                    .from('messages')
+                    .delete()
+                    .eq('id', messageId)
+                    .eq('user_id', currentUser.id); // Ensure user can only delete their own messages
+
+                if (error) {
+                    console.error('Error deleting message:', error);
+                    showToast(`Failed to delete: ${error.message}`, 5000);
+                    return;
+                }
+
+                // Remove from UI
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.classList.add('opacity-0');
+                    setTimeout(() => {
+                        messageElement.remove();
+                    }, 300);
+                }
+
+                // Remove from cache
+                messageCache.delete(messageId);
+
+                showToast('Message deleted', 3000);
+            } catch (error) {
+                console.error('Error in delete process:', error);
+                showToast('Failed to delete message. Please try again.', 3000);
+            }
+        }
+
+        // ====== EVENT LISTENERS ======
+
+        // Setup delete button listeners
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+        }
+
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (messageToDelete) {
+                    deleteMessage(messageToDelete);
+                    closeDeleteModal();
+                }
+            });
+        }
+
+        // Close modal if clicking outside the content
+        deleteConfirmationModal.addEventListener('click', (e) => {
+            if (e.target === deleteConfirmationModal) {
+                closeDeleteModal();
+            }
+        });
+
+        // Close user profile modal when clicking the close button
+        if (closeProfileModal) {
+            closeProfileModal.addEventListener('click', () => {
+                userProfileModal.classList.remove('show');
+            });
+        }
+
+        // Close user profile modal when clicking outside
+        userProfileModal.addEventListener('click', (e) => {
+            if (e.target === userProfileModal) {
+                userProfileModal.classList.remove('show');
+            }
+        });
+
+        // Edit profile button
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', () => {
+                populateEditProfileForm();
+                editProfileModal.classList.add('show');
+            });
+        }
+
+        // Close edit profile modal
+        if (closeEditModal) {
+            closeEditModal.addEventListener('click', () => {
+                editProfileModal.classList.remove('show');
+            });
+        }
+
+        // Close edit profile modal when clicking outside
+        editProfileModal.addEventListener('click', (e) => {
+            if (e.target === editProfileModal) {
+                editProfileModal.classList.remove('show');
+            }
+        });
+
+        // Edit profile form submission
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const userData = {
+                    displayName: editDisplayName.value.trim(),
+                    bio: editBio.value.trim(),
+                    skills: editSelectedSkillsArray
+                };
+
+                // Validate
+                if (!userData.displayName) {
+                    showToast('Please enter a display name.', 3000);
+                    return;
+                }
+
+                // Update profile
+                const success = await updateUserProfile(userData);
+
+                if (success) {
+                    editProfileModal.classList.remove('show');
+                    updateMyProfileTab();
+                    showToast('Profile updated successfully!', 3000);
+                }
+            });
+        }
+
+        // Add custom skill in edit form
+        if (editAddSkill) {
+            editAddSkill.addEventListener('click', () => {
+                const skill = editCustomSkill.value.trim();
+
+                if (skill && !editSelectedSkillsArray.includes(skill)) {
+                    editSelectedSkillsArray.push(skill);
+                    updateEditSelectedSkills();
+                    editCustomSkill.value = '';
+                }
+            });
+        }
+
+        // Onboarding step 1 next button
+        if (step1Next) {
+            step1Next.addEventListener('click', () => {
+                const displayName = displayNameInput.value.trim();
+                const bio = bioInput.value.trim();
+
+                if (!displayName) {
+                    showToast('Please enter a display name.', 3000);
+                    return;
+                }
+
+                goToOnboardingStep(2);
+            });
+        }
+
+        // Onboarding step 2 back button
+        if (step2Back) {
+            step2Back.addEventListener('click', () => {
+                goToOnboardingStep(1);
+            });
+        }
+
+        // Onboarding step 2 next button
+        if (step2Next) {
+            step2Next.addEventListener('click', () => {
+                goToOnboardingStep(3);
+            });
+        }
+
+        // Onboarding step 3 back button
+        if (step3Back) {
+            step3Back.addEventListener('click', () => {
+                goToOnboardingStep(2);
+            });
+        }
+
+        // Handle skill option clicks in onboarding
+        if (skillOptions) {
+            const skillOptionElements = skillOptions.querySelectorAll('.skill-option');
+            skillOptionElements.forEach(option => {
+                option.addEventListener('click', () => {
+                    const skill = option.getAttribute('data-skill');
+
+                    if (selectedSkillsArray.includes(skill)) {
+                        // Remove skill
+                        selectedSkillsArray = selectedSkillsArray.filter(s => s !== skill);
+                        option.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                    } else {
+                        // Add skill
+                        selectedSkillsArray.push(skill);
+                        option.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                    }
+
+                    // Update selected skills display
+                    updateSelectedSkills();
+                });
+            });
+        }
+
+        // Update selected skills in onboarding
+        function updateSelectedSkills() {
+            selectedSkills.innerHTML = '';
+
+            if (selectedSkillsArray.length === 0) {
+                selectedSkills.innerHTML = '<span class="text-[#a08068]">No skills selected</span>';
+                return;
+            }
+
+            selectedSkillsArray.forEach(skill => {
+                const skillTag = document.createElement('div');
+                skillTag.classList.add('skill-tag', 'relative');
+
+                skillTag.innerHTML = `
+                    ${escapeHTML(skill)}
+                    <span class="ml-2 cursor-pointer" data-skill="${escapeHTML(skill)}">×</span>
+                `;
+
+                selectedSkills.appendChild(skillTag);
+
+                // Add remove event
+                const removeBtn = skillTag.querySelector('span');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const skill = removeBtn.getAttribute('data-skill');
+
+                    // Remove from array
+                    selectedSkillsArray = selectedSkillsArray.filter(s => s !== skill);
+
+                    // Update display
+                    updateSelectedSkills();
+
+                    // Update skill option visual state
+                    const skillOption = document.querySelector(`.skill-option[data-skill="${skill}"]`);
+                    if (skillOption) {
+                        skillOption.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                    }
+                });
+            });
+        }
+
+        // Add custom skill in onboarding
+        if (addCustomSkillBtn) {
+            addCustomSkillBtn.addEventListener('click', () => {
+                const skill = customSkillInput.value.trim();
+
+                if (skill && !selectedSkillsArray.includes(skill)) {
+                    selectedSkillsArray.push(skill);
+                    updateSelectedSkills();
+                    customSkillInput.value = '';
+                }
+            });
+
+            // Also allow Enter key
+            customSkillInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addCustomSkillBtn.click();
+                }
+            });
+        }
+
+        // Role selection in onboarding
+        if (roleBishop) {
+            roleBishop.addEventListener('click', () => {
+                if (roleBishop.hasAttribute('disabled')) return;
+
+                selectedRole = 'bishop';
+                roleBishop.classList.add('border-[#d4a76a]', 'bg-[#1a1611]');
+                roleKnight.classList.remove('border-[#d4a76a]', 'bg-[#1a1611]');
+            });
+        }
+
+        if (roleKnight) {
+            roleKnight.addEventListener('click', () => {
+                if (roleKnight.hasAttribute('disabled')) return;
+
+                selectedRole = 'knight';
+                roleKnight.classList.add('border-[#d4a76a]', 'bg-[#1a1611]');
+                roleBishop.classList.remove('border-[#d4a76a]', 'bg-[#1a1611]');
+            });
+        }
+
+        // Complete onboarding
+        if (completeOnboarding) {
+            completeOnboarding.addEventListener('click', async () => {
+                try {
+                    if (!selectedRole) {
+                        showToast('Please select a role.', 3000);
+                        return;
+                    }
+
+                    showLoading(true);
+
+                    const userData = {
+                        displayName: displayNameInput.value.trim(),
+                        bio: bioInput.value.trim(),
+                        skills: selectedSkillsArray,
+                        role: selectedRole
+                    };
+
+                    const success = await completeUserOnboarding(userData);
+
+                    if (success) {
+                        showToast('Onboarding completed! Welcome to the War Room.', 3000);
+                        updateUI({ user: currentUser });
+                    } else {
+                        showLoading(false);
+                    }
+                } catch (error) {
+                    console.error('Error completing onboarding:', error);
+                    showToast('An error occurred. Please try again.', 5000);
+                    showLoading(false);
+                }
+            });
+        }
+
+        // Tab switching
+        if (tabChat) {
+            tabChat.addEventListener('click', () => switchTab('chat'));
+        }
+
+        if (tabProfiles) {
+            tabProfiles.addEventListener('click', () => switchTab('profiles'));
+        }
+
+        if (tabMyProfile) {
+            tabMyProfile.addEventListener('click', () => switchTab('my-profile'));
+        }
+
+        // Header navigation
+        if (navChat) {
+            navChat.addEventListener('click', () => switchTab('chat'));
+        }
+
+        if (navProfiles) {
+            navProfiles.addEventListener('click', () => switchTab('profiles'));
+        }
+
+        if (navMyProfile) {
+            navMyProfile.addEventListener('click', () => switchTab('my-profile'));
+        }
+
+        // Filter buttons in Profiles tab
+        if (filterAll) {
+            filterAll.addEventListener('click', () => {
+                currentFilter = 'all';
+
+                // Update button styles
+                filterAll.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterAll.classList.remove('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterOnline.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterOnline.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterBishops.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterBishops.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterKnights.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterKnights.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                renderMembers(currentFilter, userSearch.value);
+            });
+        }
+
+        if (filterOnline) {
+            filterOnline.addEventListener('click', () => {
+                currentFilter = 'online';
+
+                // Update button styles
+                filterOnline.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterOnline.classList.remove('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterAll.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterAll.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterBishops.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterBishops.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterKnights.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterKnights.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                renderMembers(currentFilter, userSearch.value);
+            });
+        }
+
+        if (filterBishops) {
+            filterBishops.addEventListener('click', () => {
+                currentFilter = 'bishops';
+
+                // Update button styles
+                filterBishops.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterBishops.classList.remove('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterAll.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterAll.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterOnline.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterOnline.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterKnights.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterKnights.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                renderMembers(currentFilter, userSearch.value);
+            });
+        }
+
+        if (filterKnights) {
+            filterKnights.addEventListener('click', () => {
+                currentFilter = 'knights';
+
+                // Update button styles
+                filterKnights.classList.add('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterKnights.classList.remove('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterAll.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterAll.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterOnline.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterOnline.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                filterBishops.classList.remove('bg-[#8b5a2b]', 'text-[#f5efe6]');
+                filterBishops.classList.add('bg-[#3c2f24]', 'text-[#e0d2c3]');
+
+                renderMembers(currentFilter, userSearch.value);
+            });
+        }
+
+        // Search input in Profiles tab
+        if (userSearch) {
+            userSearch.addEventListener('input', debounce(() => {
+                renderMembers(currentFilter, userSearch.value);
+            }, 300));
+        }
+
+        // Debounce function for search input
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Set up presence tracking on window events
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                updatePresence(false);
+            }
+        });
+
+        // Handle visibility change to update presence
+        document.addEventListener('visibilitychange', () => {
+            if (currentUser) {
+                updatePresence(!document.hidden);
+            }
+        });
+
+        // Handle sign-in with Google
+        loginBtn.addEventListener('click', async () => {
+            showLoading(true);
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+
+            if (error) {
+                console.error('Error during Google sign-in:', error.message);
+                alert('Sign in failed. Please try again.');
+                showLoading(false);
+            }
+        });
+
+        // Handle sign-out button
+        if (logoutAppBtn) {
+            logoutAppBtn.addEventListener('click', async () => {
+                // Set user as offline
+                if (currentUser) {
+                    await updatePresence(false);
+                }
+
+                // Clean up subscription
+                if (currentChannel) {
+                    supabaseClient.removeChannel(currentChannel);
+                    currentChannel = null;
+                }
+
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) {
+                    console.error('Error during sign out:', error.message);
+                    alert('Sign out failed. Please try again.');
+                }
+            });
+        }
+
+        // Add keyboard shortcut for sending messages
+        messageInput.addEventListener('keydown', (e) => {
+            // Send on Enter (but not with Shift key for multiline text)
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Handle connection status
+        window.addEventListener('online', () => {
+            console.log('Back online');
+            showToast('You are back online! Reconnecting...');
+
+            // Resubscribe to messages to ensure we're getting updates
+            subscribeToMessages();
+
+            // Check for missed messages
+            checkForNewMessages();
+
+            if (currentUser) {
+                updatePresence(true);
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('Offline');
+            showToast('You are offline. Messages will be sent when you reconnect.', 5000);
+        });
+
+        // Modified periodic check for new messages
+        setInterval(() => {
+            if (currentUser) {
+                checkForNewMessages();
+            }
+        }, 60000); // Check every 60 seconds
+
+        // Function to check for any missed messages with improved duplicate handling
+        async function checkForNewMessages() {
+            try {
+                // Find latest message timestamp from cache
+                let latestTimestamp = null;
+                if (messageCache.size > 0) {
+                    latestTimestamp = new Date(0); // Initialize with epoch
+
+                    // Iterate through the message cache to find the latest timestamp
+                    for (const message of messageCache.values()) {
+                        const msgDate = new Date(message.created_at);
+                        if (msgDate > latestTimestamp) {
+                            latestTimestamp = msgDate;
+                        }
+                    }
+                }
+
+                // Query for newer messages
+                const query = supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (latestTimestamp) {
+                    // Add a small buffer (1 second) to avoid timezone/precision issues
+                    const bufferedTime = new Date(latestTimestamp.getTime() + 1000);
+                    query.gt('created_at', bufferedTime.toISOString());
+                }
+
+                const { data: newMessages, error } = await query;
+
+                if (error) throw error;
+
+                if (newMessages && newMessages.length > 0) {
+                    console.log('Found missed messages:', newMessages.length);
+
+                    // Filter out messages we already have in the cache
+                    const uniqueMessages = newMessages.filter(newMsg => !messageCache.has(newMsg.id));
+
+                    if (uniqueMessages.length > 0) {
+                        console.log('Processing unique missed messages:', uniqueMessages.length);
+
+                        // Group new messages by date
+                        const messageGroups = groupMessagesByDate(uniqueMessages);
+
+                        // Process each date group
+                        for (const dateKey in messageGroups) {
+                            const messages = messageGroups[dateKey];
+
+                            // Check if we need to add a date divider
+                            const existingDivider = Array.from(messagesContainer.querySelectorAll('.date-divider'))
+                                .find(div => div.textContent.includes(formatDateForDisplay(dateKey)));
+
+                            if (!existingDivider && messages.length > 0) {
+                                // Add date divider
+                                const dateElement = document.createElement('div');
+                                dateElement.classList.add('date-divider');
+                                dateElement.innerHTML = `<span class="text-xs text-[#a08068] px-2">${formatDateForDisplay(dateKey)}</span>`;
+                                messagesContainer.appendChild(dateElement);
+                            }
+
+                            // Display each message
+                            messages.forEach(message => {
+                                if (!messageCache.has(message.id)) {
+                                    displayMessage(message);
+                                    messageCache.set(message.id, message);
+                                }
+                            });
+                        }
+
+                        // Notify user about new messages
+                        if (uniqueMessages.length > 0) {
+                            showToast(`${uniqueMessages.length} new message${uniqueMessages.length > 1 ? 's' : ''} received`);
+                            scrollToBottom();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for missed messages:', error);
+            }
+        }
+
+        // INITIALIZATION
 
         // Check for an existing session on load
         supabaseClient.auth.getSession().then(({ data: { session } }) => {
             updateUI(session);
             showLoading(false);
+
+            // Subscribe to presence changes
+            subscribeToPresence();
+
+            // Update online user count periodically
+            setInterval(updateOnlineUserCount, 30000); // Every 30 seconds
+            updateOnlineUserCount();
         });
 
         // Listen for auth state changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
             updateUI(session);
         });
-
-        // Handle sign-in with Google
-        loginBtn.addEventListener('click', async () => {
-            const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-            if (error) {
-                console.error('Error during Google sign-in:', error.message);
-            }
-        });
-
-        // Handle sign-out
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                const { error } = await supabaseClient.auth.signOut();
-                if (error) {
-                    console.error('Error during sign out:', error.message);
-                }
-            });
-        }
     </script>
 </body>
 
